@@ -11,11 +11,11 @@ var app = express();
 
 // if in development mode, load .env variables
 if (app.get("env") === "development") {
-    env(__dirname + '/.env');
+    //env(__dirname + '/.env');
 }
 
 // connect to database
-app.db = mongoose.connect(process.env.MONGODB_URI);
+app.db = mongoose.connect('mongodb://welifesys:musicradio123456@ds117109.mlab.com:17109/welife');
 
 // view engine setup - this app uses Hogan-Express
 // https://github.com/vol4ok/hogan-express
