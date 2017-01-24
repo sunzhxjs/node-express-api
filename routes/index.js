@@ -1,6 +1,22 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
+var sharp = require('sharp');
+
+var aws = require('aws-sdk'),
+    multer = require('multer');
+    //multerS3 = require('multer-s3');
+
+aws.config.update({
+    secretAccessKey: 'u8fMJqGJqcqyKkc46exL83gzx3/TZ+gpAIgsfE4x',
+    accessKeyId: 'AKIAJMTB7ODEEOJSD73Q',
+    region: 'us-east-2'
+});
+
+var s3 = new aws.S3();
+
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
 
 // our db model
 var Animal = require("../models/model.js");
@@ -38,6 +54,28 @@ router.get('/', function(req, res) {
 router.get('/sample-page', function(req,res){
   res.render('sample.html')
 })
+
+
+
+
+router.post('/api/upload', upload.array('upl',1), function (req, res, next) {
+    console.log(req.files);
+    sharp(req.files[0].buffer).resize(300,200).toBuffer(function(err,buffer,info) {
+        if (err) {
+          throw err;
+         }
+        console.log(info);
+        s3.putObject({
+          Bucket: 'welifephotos', 
+          Key: 'compressed'+req.files[0].originalname,
+          Body: buffer
+          }, function(err, data) {
+          if (err) console.log(err, err.stack); // an error occurred
+          else console.log(data);           // successful response
+        });
+    });
+    res.send("Uploaded!");
+});
 
 // /**
 //  * POST '/api/create'
